@@ -1,4 +1,5 @@
 import React from "react"
+import { baseUrl } from "../config"
 
 
 function Assets() {
@@ -6,7 +7,7 @@ function Assets() {
 
   React.useEffect(() => {
     async function getProducts() {
-      const req = await fetch("/api/products")
+      const req = await fetch(`${baseUrl}/products`)
       const data = await req.json()
       setAssets(data)
     }

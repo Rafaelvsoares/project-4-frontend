@@ -1,9 +1,33 @@
 import React from 'react';
-import { AppBar, Box, Toolbar, Container, CssBaseline } from '@mui/material'
+import { AppBar, Box, Toolbar, Container, CssBaseline, Button, Avatar, Tooltip, IconButton, Menu, MenuItem, Typography } from '@mui/material'
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
-function NavBar() {
+
+const settings = ['my 3D models', 'logout']
+
+function NavBar({ user, setUser }: any) {
+
+  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null)
+
+  const navigate = useNavigate()
+  function logout() {
+    localStorage.removeItem('token')
+    setUser(null)
+    navigate('/')
+  }
+
+  function handleOpenUserMenu(event: React.MouseEvent<HTMLElement>) {
+    setAnchorElUser(event.currentTarget)
+  }
+
+  function handleCloseUserMenu() {
+    setAnchorElUser(null)
+  }
+
+  function getLetters() {
+    return user.username.slice(0, 2).toUpperCase()
+  }
 
   const pageStyle = {
     margin: '1rem',
@@ -43,10 +67,47 @@ function NavBar() {
               <Link to='/products' style={pageStyle}>assets</Link>
             </Box>
             <Box component='div' sx={{ fontFamily: 'Open Sans', flexGrow: 0.5, display: { xs: 'none', md: 'flex' } }}>
-              <Link to='/login' style={logSignStyle}>login</Link>
-              <Link to='/register' style={logSignStyle}>signup</Link>
+              {!user && <><Link to='/login' style={logSignStyle}>login</Link>
+                <Link to='/register' style={logSignStyle}>register</Link></>}
               <Link to='/basket' style={logSignStyle}>basket</Link>
             </Box>
+
+
+            {user && <Box sx={{ flexGrow: 0 }}>
+              <Tooltip title="Open settings">
+                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                  <Avatar>{getLetters()}</Avatar>
+                </IconButton>
+              </Tooltip>
+              <Menu
+                sx={{ mt: '45px' }}
+                id="menu-appbar"
+                anchorEl={anchorElUser}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={Boolean(anchorElUser)}
+                onClose={handleCloseUserMenu}
+              >
+
+                <MenuItem key='my 3D models' onClick={handleCloseUserMenu}>
+                  <Link to="/mymodels">
+                    <Typography textAlign="center">my 3D models</Typography>
+                  </Link>
+
+                </MenuItem>
+                <MenuItem key='logout' onClick={() => { handleCloseUserMenu(), logout() }}>
+                  <Typography textAlign="center">logout</Typography>
+                </MenuItem>
+
+              </Menu>
+            </Box>}
           </Toolbar>
         </Container>
       </AppBar>
