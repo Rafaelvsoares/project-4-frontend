@@ -10,6 +10,8 @@ import Basket from './pages/Basket'
 import axios from 'axios'
 import { baseUrl } from './config'
 import MyModels from './pages/MyModels'
+import CreateProduct from './pages/CreateProduct'
+import UploadImage from './components/UploadImage'
 
 function App() {
   const [user, setUser] = React.useState(null)
@@ -41,7 +43,11 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login  fetchUser={fetchUser}/>} />
           <Route path="/basket" element={<Basket  />} />
-          <Route path="/mymodels" element={<MyModels user={user}/>} />
+          {user && <>
+          <Route path="/mymodels" element={<MyModels />} />
+          <Route path="/mymodels/create" element={<CreateProduct user={user}/>}/>
+          <Route path="/testingimages" element={<UploadImage />}/>
+          </>}
         </Routes>
       </main>
       <footer style={{ marginTop: '10vh' }}>

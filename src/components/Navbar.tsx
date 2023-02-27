@@ -42,6 +42,7 @@ function NavBar({ user, setUser }: any) {
     borderRadius: 6,
     color: 'white',
     backgroundColor: '#426da2',
+    textDecoration: 'none'
   }
 
   const theme = createTheme({
@@ -65,6 +66,9 @@ function NavBar({ user, setUser }: any) {
             </Box>
             <Box component='div' sx={{ fontFamily: 'Open Sans', flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
               <Link to='/products' style={pageStyle}>assets</Link>
+            </Box>
+            <Box component='div' sx={{ fontFamily: 'Open Sans', flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+              <Link to='/testingimages' style={pageStyle}>images</Link>
             </Box>
             <Box component='div' sx={{ fontFamily: 'Open Sans', flexGrow: 0.5, display: { xs: 'none', md: 'flex' } }}>
               {!user && <><Link to='/login' style={logSignStyle}>login</Link>

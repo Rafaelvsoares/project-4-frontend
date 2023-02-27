@@ -1,8 +1,9 @@
-import { TextField, Container, Grid, Typography, Box, ThemeProvider, CssBaseline, Button, createTheme, FormControl, InputLabel, OutlinedInput, InputAdornment, Select, MenuItem, SelectChangeEvent } from '@mui/material'
+import { TextField, Container, Grid, Typography, Box, ThemeProvider, CssBaseline, Button, createTheme, FormControl, InputLabel, OutlinedInput, InputAdornment, Select, MenuItem, SelectChangeEvent, TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody, Checkbox, Chip } from '@mui/material'
 import { Link, useNavigate } from 'react-router-dom'
 import React from 'react'
 import axios from 'axios'
 import { baseUrl } from '../config'
+import DeleteIcon from '@mui/icons-material/Delete'
 
 const theme = createTheme({
   palette: {
@@ -24,132 +25,133 @@ const theme = createTheme({
   }
 })
 
+const createButtonStyle = {
+  margin: '1rem',
+  padding: '0.1rem 1.5rem',
+  border: '0.5px solid grey',
+  borderRadius: 6,
+  color: 'white',
+  backgroundColor: '#426da2',
+  textDecoration: 'none'
+}
 
-function MyModels({user} : any) {
-  console.log(user)
-  const navigate = useNavigate()
-  const [price, setPrice] = React.useState('')
-  const [polygons, setPolygons] = React.useState('')
-  const [category, setCategory] = React.useState('')
-  const [formData, setFormData] = React.useState({
-    title: "",
-    price: 0,
-    polygons: "",
-    description: "",
-    category_id: "",
-    images: []
-  })
-  console.log(formData)
-  console.log(category)
-  async function handleSubmit(e: React.SyntheticEvent) {
-    e.preventDefault()
-    try {
-      const token = localStorage.getItem('token')
-      const { data } = await axios.post(`${baseUrl}/products`, formData, {
-        headers: { Authorization: `Bearer ${token}` }
+function MyModels() {
+
+  const [myProducts, setMyProducts] = React.useState<any>(null)
+  const [checked, setChecked] = React.useState<any>(false)
+  const [selectedProducts, setSelectedProducts] = React.useState<any>([])
+  const token = localStorage.getItem('token')
+
+  async function getProducts() {
+    const req = await fetch(`${baseUrl}/products/user`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    const data = await req.json()
+    setMyProducts(data)
+  }
+
+  React.useEffect(() => {
+    getProducts()
+  }, [])
+
+
+  async function handleDelete() {
+    await Promise.all(
+      selectedProducts.map(async (product: any) => {
+        const { req }: any = await axios.delete(`${baseUrl}/products/${product.id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
       })
-      console.log(data)
-    } catch (err: any) {
-      console.log(err.response.data.errors)
-      return
-    }
-    navigate('/')
+    )
+    console.log(selectedProducts)
+    setSelectedProducts([])
+    await getProducts()
   }
 
-  function handleData(e: any) {
-    const newFormData = structuredClone(formData)
-    newFormData[e.target.name] = e.target.value
-    newFormData["price"] = parseFloat(newFormData["price"])
-    newFormData["polygons"] = parseFloat(newFormData["polygons"])
-    newFormData["images"] = ["image1test", "image2test"]
-    setFormData(newFormData)
+function handleSelectAll() {
+  if (checked) {
+    setSelectedProducts([]);
+  } else {
+    setSelectedProducts(myProducts);
   }
+  setChecked(!checked);
+}
 
-  function handleChange(e: any) {
-    if(e.target.name === 'price'){
-      validateInput(e)
-    } else if(e.target.name === 'category_id'){
-      setCategory(e.target.value as string)
-    }
-    handleData(e)
+function handleSelectRow(product: any) {
+  const index = selectedProducts.findIndex((p: any) => p.id === product.id);
+  if (index !== -1) {
+    const newSelectedProducts = [...selectedProducts];
+    newSelectedProducts.splice(index, 1);
+    setSelectedProducts(newSelectedProducts);
+  } else {
+    setSelectedProducts([...selectedProducts, product]);
   }
+}
 
-  function validateInput(e: any){
-    const inputValue = e.target.value
-    const numericValue = inputValue.replace(/[^0-9]/g, '')
-    console.log(numericValue)
-    setPrice(numericValue)
-    setPolygons(numericValue)
-  }
 
-  return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Container component='main' maxWidth='xs' sx={{ height: '60vh' }}>
-        <Box component='div'
-          sx={{
-            marginTop: 6,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-          <Typography component='h1' variant='h5' fontFamily='Open Sans'>
-            Create your product
-          </Typography>
-          <Box component='form' onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
-            <Grid container spacing={1}>
-              <Grid item xs={6} lg={6}>
-                <TextField required fullWidth label='Title' name='title' type='name' id='name' autoComplete='title' onChange={handleData} autoFocus />
-              </Grid>
-              <Grid item xs={6} lg={6}>
-                <FormControl fullWidth>
-                  <TextField required fullWidth label='Price' name='price' type='name' id='name' autoComplete='Price' value={price} onChange={handleChange} />
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} lg={12}>
-                <TextField required fullWidth label='3D file' name='3D file' type='name' id='name' autoComplete='3D file' onChange={handleData} />
-              </Grid>
-              <Grid item xs={12} lg={12}>
-                <TextField required fullWidth label='Description' name='description' type='name' id='description' autoComplete='description' multiline rows={4} onChange={handleData} />
-              </Grid>
-              <Grid item xs={6} lg={6}>
-                <FormControl fullWidth>
-                  <InputLabel id="category-select">Category</InputLabel>
-                  <Select
-                    labelId="category-select"
-                    id="category-select"
-                    value={category}
-                    name="category_id"
-                    label="Category"
-                    onChange={handleChange}
+if (!myProducts) {
+  return <h1>Loading</h1>
+}
+
+return (
+  <ThemeProvider theme={theme}>
+    <CssBaseline />
+    <Container fixed>
+      <Grid container>
+        <Grid item xs={12} lg={12}>
+          <Link to='/mymodels/create' style={createButtonStyle}>create product</Link>
+        </Grid>
+        {myProducts.length !== 0 && <Grid item>
+          <TableContainer component={Paper}>
+            <Table sx={{ minWidth: 650 }} aria-label="simple table">
+              <TableHead>
+                {selectedProducts.length !== 0 && <TableRow>
+                  <TableCell align="right">
+                    <Chip label="delete" color="warning" onDelete={handleDelete} deleteIcon={<DeleteIcon />} variant="outlined" />
+                  </TableCell>
+                </TableRow>}
+                <TableRow>
+                  <TableCell padding="checkbox">
+                    <Checkbox color="primary" checked={selectedProducts.length === myProducts.length} onClick={handleSelectAll} />
+                  </TableCell>
+                  <TableCell align="right">Id</TableCell>
+                  <TableCell align="right">Title</TableCell>
+                  <TableCell align="right">Price</TableCell>
+                  <TableCell align="right">Description</TableCell>
+                  <TableCell align="right">Images</TableCell>
+                  <TableCell align="right">Polygons</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {myProducts.map((row: any) => (
+                  <TableRow
+                    key={row.title}
+                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                   >
-                    <MenuItem value={1}>Characters</MenuItem>
-                    <MenuItem value={2}>Vehicles</MenuItem>
-                    <MenuItem value={3}>Furniture</MenuItem>
-                    <MenuItem value={4}>Props</MenuItem>
-                    <MenuItem value={5}>Environments</MenuItem>
-                    <MenuItem value={6}>Buildings</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={6} lg={6}>
-                <FormControl fullWidth>
-                  <TextField required fullWidth label='Polygons' name='polygons' type='name' id='name' autoComplete='Polygons' value={polygons} onChange={handleChange}></TextField>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12}>
-                <Button type='submit' fullWidth variant='contained' sx={{ mt: 2, mb: 2 }}>
-                  Post
-                </Button>
-              </Grid>
-            </Grid>
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        color="primary"
+                        checked={selectedProducts.some((p: any) => p.id === row.id)}
+                        onClick={() => handleSelectRow(row)}
+                      />
+                    </TableCell>
+                    <TableCell align="right">{row.id}</TableCell>
+                    <TableCell align="right">{row.title}</TableCell>
+                    <TableCell align="right">{row.price}</TableCell>
+                    <TableCell align="right">{row.description}</TableCell>
+                    <TableCell align="right">{row.images.length}</TableCell>
+                    <TableCell align="right">{row.polygons}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Grid>}
+      </Grid>
 
-          </Box>
-        </Box>
-      </Container>
-    </ThemeProvider>
-  )
+    </Container>
+  </ThemeProvider>
+)
 
 }
 
