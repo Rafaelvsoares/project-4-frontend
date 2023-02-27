@@ -25,9 +25,11 @@ const theme = createTheme({
 })
 
 
-function MyModels() {
-
+function MyModels({user} : any) {
+  console.log(user)
   const navigate = useNavigate()
+  const [price, setPrice] = React.useState('')
+  const [polygons, setPolygons] = React.useState('')
   const [category, setCategory] = React.useState('')
   const [formData, setFormData] = React.useState({
     title: "",
@@ -37,11 +39,16 @@ function MyModels() {
     category_id: "",
     images: []
   })
-
+  console.log(formData)
+  console.log(category)
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault()
     try {
-      const { data } = await axios.post(`${baseUrl}/products`, formData)
+      const token = localStorage.getItem('token')
+      const { data } = await axios.post(`${baseUrl}/products`, formData, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      console.log(data)
     } catch (err: any) {
       console.log(err.response.data.errors)
       return
@@ -49,17 +56,32 @@ function MyModels() {
     navigate('/')
   }
 
-  function handleChange(e: any) {
+  function handleData(e: any) {
     const newFormData = structuredClone(formData)
     newFormData[e.target.name] = e.target.value
+    newFormData["price"] = parseFloat(newFormData["price"])
+    newFormData["polygons"] = parseFloat(newFormData["polygons"])
+    newFormData["images"] = ["image1test", "image2test"]
     setFormData(newFormData)
   }
 
-  function handleCategoryChange(event: SelectChangeEvent) {
-    setCategory(event.target.value as string)
+  function handleChange(e: any) {
+    if(e.target.name === 'price'){
+      validateInput(e)
+    } else if(e.target.name === 'category_id'){
+      setCategory(e.target.value as string)
+    }
+    handleData(e)
   }
 
-  console.log(formData)
+  function validateInput(e: any){
+    const inputValue = e.target.value
+    const numericValue = inputValue.replace(/[^0-9]/g, '')
+    console.log(numericValue)
+    setPrice(numericValue)
+    setPolygons(numericValue)
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -78,26 +100,18 @@ function MyModels() {
           <Box component='form' onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
             <Grid container spacing={1}>
               <Grid item xs={6} lg={6}>
-                <TextField required fullWidth label='Title' name='title' type='name' id='name' autoComplete='title' onChange={handleChange} autoFocus />
+                <TextField required fullWidth label='Title' name='title' type='name' id='name' autoComplete='title' onChange={handleData} autoFocus />
               </Grid>
               <Grid item xs={6} lg={6}>
                 <FormControl fullWidth>
-                  <InputLabel htmlFor="outlined-adornment-amount" >Price</InputLabel>
-                  <OutlinedInput
-                    id="outlined-adornment-amount"
-                    type="number"
-                    startAdornment={<InputAdornment position="start">£</InputAdornment>}
-                    label="Amount"
-                    name="price"
-                    onChange={handleChange}
-                  />
+                  <TextField required fullWidth label='Price' name='price' type='name' id='name' autoComplete='Price' value={price} onChange={handleChange} />
                 </FormControl>
               </Grid>
               <Grid item xs={12} lg={12}>
-                <TextField required fullWidth label='3D file' name='3D file' type='name' id='name' autoComplete='3D file' onChange={handleChange} />
+                <TextField required fullWidth label='3D file' name='3D file' type='name' id='name' autoComplete='3D file' onChange={handleData} />
               </Grid>
               <Grid item xs={12} lg={12}>
-                <TextField required fullWidth label='Description' name='description' type='name' id='description' autoComplete='description' multiline rows={4} maxRows={6} />
+                <TextField required fullWidth label='Description' name='description' type='name' id='description' autoComplete='description' multiline rows={4} onChange={handleData} />
               </Grid>
               <Grid item xs={6} lg={6}>
                 <FormControl fullWidth>
@@ -106,8 +120,9 @@ function MyModels() {
                     labelId="category-select"
                     id="category-select"
                     value={category}
+                    name="category_id"
                     label="Category"
-                    onChange={handleCategoryChange}
+                    onChange={handleChange}
                   >
                     <MenuItem value={1}>Characters</MenuItem>
                     <MenuItem value={2}>Vehicles</MenuItem>
@@ -120,7 +135,7 @@ function MyModels() {
               </Grid>
               <Grid item xs={6} lg={6}>
                 <FormControl fullWidth>
-                  <TextField required fullWidth label='Polygons' name='polygons' type='name' id='name' autoComplete='Polygons' onChange={handleChange}></TextField>
+                  <TextField required fullWidth label='Polygons' name='polygons' type='name' id='name' autoComplete='Polygons' value={polygons} onChange={handleChange}></TextField>
                 </FormControl>
               </Grid>
               <Grid item xs={12}>

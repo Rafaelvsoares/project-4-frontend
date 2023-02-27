@@ -41,7 +41,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login  fetchUser={fetchUser}/>} />
           <Route path="/basket" element={<Basket  />} />
-          <Route path="/mymodels" element={<MyModels />} />
+          <Route path="/mymodels" element={<MyModels user={user}/>} />
         </Routes>
       </main>
       <footer style={{ marginTop: '10vh' }}>
