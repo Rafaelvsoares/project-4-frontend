@@ -42,11 +42,10 @@ function App() {
           <Route path="/products" element={<Assets />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login  fetchUser={fetchUser}/>} />
-          <Route path="/basket" element={<Basket  />} />
+          <Route path="/basket" element={<Basket />} />
           {user && <>
           <Route path="/mymodels" element={<MyModels />} />
           <Route path="/mymodels/create" element={<CreateProduct user={user}/>}/>
-          <Route path="/testingimages" element={<UploadImage />}/>
           </>}
         </Routes>
       </main>

@@ -3,14 +3,14 @@ import { Card, CardContent, CardMedia, Typography, Box, Button } from '@mui/mate
 import { Link } from 'react-router-dom';
 
 function ProductCard({ title, price, images }: any) {
-  console.log(images[0])
+  console.log('here', images[0])
   return (
     <>
       <Card sx={{ maxWidth: 400, display: 'flex', flexDirection: 'column' }}>
         <Link to={``}>
           <CardMedia
             sx={{ height: 300 }}
-            src={images[0]}
+            image={images[0].image_url}
           />
         </Link>
         <Box component='div' sx={{ display: 'flex', flexDirection: 'row' }}>

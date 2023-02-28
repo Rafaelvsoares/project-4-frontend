@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import React from 'react'
 import axios from 'axios'
 import { baseUrl } from '../config'
+import UploadImage from '../components/UploadImage'
 
 const theme = createTheme({
   palette: {
@@ -29,7 +30,7 @@ function CreateProduct({user} : any) {
   console.log(user)
   const navigate = useNavigate()
   const [price, setPrice] = React.useState('')
-  const [polygons, setPolygons] = React.useState('')
+  const [images, setImages] = React.useState<any>('')
   const [category, setCategory] = React.useState('')
   const [formData, setFormData] = React.useState({
     title: "",
@@ -53,15 +54,16 @@ function CreateProduct({user} : any) {
       console.log(err.response.data.errors)
       return
     }
+    setImages('')
     navigate('/')
   }
+
 
   function handleData(e: any) {
     const newFormData = structuredClone(formData)
     newFormData[e.target.name] = e.target.value
     newFormData["price"] = parseFloat(newFormData["price"])
-    newFormData["polygons"] = parseFloat(newFormData["polygons"])
-    newFormData["images"] = ["image1test", "image2test"]
+    newFormData["images"] = images
     setFormData(newFormData)
   }
 
@@ -79,7 +81,6 @@ function CreateProduct({user} : any) {
     const numericValue = inputValue.replace(/[^0-9]/g, '')
     console.log(numericValue)
     setPrice(numericValue)
-    setPolygons(numericValue)
   }
 
   return (
@@ -108,9 +109,6 @@ function CreateProduct({user} : any) {
                 </FormControl>
               </Grid>
               <Grid item xs={12} lg={12}>
-                <TextField required fullWidth label='3D file' name='3D file' type='name' id='name' autoComplete='3D file' onChange={handleData} />
-              </Grid>
-              <Grid item xs={12} lg={12}>
                 <TextField required fullWidth label='Description' name='description' type='name' id='description' autoComplete='description' multiline rows={4} onChange={handleData} />
               </Grid>
               <Grid item xs={6} lg={6}>
@@ -135,8 +133,11 @@ function CreateProduct({user} : any) {
               </Grid>
               <Grid item xs={6} lg={6}>
                 <FormControl fullWidth>
-                  <TextField required fullWidth label='Polygons' name='polygons' type='name' id='name' autoComplete='Polygons' value={polygons} onChange={handleChange}></TextField>
+                  <TextField required fullWidth label='Polygons' name='polygons' type='name' id='name' autoComplete='Polygons' onChange={handleData}></TextField>
                 </FormControl>
+              </Grid>
+              <Grid item xs={12} lg={12}>
+                <UploadImage setImages={setImages} handleData={handleData}/>
               </Grid>
               <Grid item xs={12}>
                 <Button type='submit' fullWidth variant='contained' sx={{ mt: 2, mb: 2 }}>
